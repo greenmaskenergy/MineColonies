@@ -13,11 +13,9 @@ REM checking if parent folder is actualy called mods! to make sure it download t
 REM setting the variable to the parent folder name
 echo this downloader is located at:
 echo.
-set "RawPath=%CD%"
-for %%I in (.) do set Parent=%%~nxI
-for /D %%D in ("%RawPath%") do (
-    set "ColorRawPath=%%~dpD"
-)
+set "RawPath=%~dp0"
+for %%I in ("%~dp0") do for %%J in ("%%~dpI.") do set Parent=%%~nxJ
+for /D %%D in ("%~dp0.") do (set "ColorRawPath=%%~dpD")
 
 
 if %Parent% == mods (
@@ -30,7 +28,7 @@ if %Parent% == mods (
     echo.%date% %time% >> latestLog.txt
     goto dowloadingMissingMods
 ) else (
-    echo [36m%ColorRawPath%[0m[31m%Parent%[0m
+    echo [36m%RawPath%[0m[31m%Parent%[0m
     echo.
     echo [91mWrong directory this downloader needs to be placed in "/mod" Folder[0m
     echo.
@@ -48,18 +46,18 @@ echo Downloading ModListFile (mods) >> latestLog.txt
 echo --------------------------------------------------------------------------------------------- >> latestLog.txt
 echo.  TimeStamp   progress  status    modname >> latestLog.txt
 echo --------------------------------------------------------------------------------------------- >> latestLog.txt
-bitsadmin.exe /transfer "" /priority FOREGROUND https://onehit.eu/MC_ModLists/MineColonies/mods %cd%/mods
+bitsadmin.exe /transfer "" /priority FOREGROUND https://onehit.eu/MC_ModLists/MineColonies/mods %~dp0/mods
 REM >> latestLog.txt
-set "cmd=findstr /R /N "^^" %cd%\mods | find /C ":""
+set "cmd=findstr /R /N "^^" %~dp0\mods | find /C ":""
 for /f %%a in ('!cmd!') do set ModCount=%%a
 
-for /F "tokens=*" %%A in (%cd%\mods) do (
+for /F "tokens=*" %%A in (%~dp0\mods) do (
     set /a progress=progress+1
     REM echo Mod Progress: !progress! / %ModCount% >> latestLog.txt
 
-if not exist %cd%\%%A (
+if not exist %~dp0\%%A (
     echo [%time%]  !progress! / %ModCount%   Install  %%A >> latestLog.txt
-    bitsadmin.exe /transfer "Mod (!progress! / !ModCount!): %%A"  /priority FOREGROUND https://github.com/greenmaskenergy/MineColonies/raw/master/%%A %cd%\%%A
+    bitsadmin.exe /transfer "Mod (!progress! / !ModCount!): %%A"  /priority FOREGROUND https://github.com/greenmaskenergy/MineColonies/raw/master/%%A %~dp0\%%A
 ) else (
     echo [%time%]  !progress! / %ModCount%   Skipped   %%A >> latestLog.txt
 )
