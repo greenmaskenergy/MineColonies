@@ -24,8 +24,8 @@ if %Parent% == mods (
     echo.
     echo.
     pause>nul|set/p =[36mpress any key to start[0m downloading missing mods.
-    echo.Downloader started from %RawPath%> latestLog.txt
-    echo.%date% %time% >> latestLog.txt
+    echo.Downloader started from %RawPath%> %RawPath%/latestLog.txt
+    echo.%date% %time% >> %RawPath%/latestLog.txt
     goto dowloadingMissingMods
 ) else (
     echo [36m%RawPath%[0m[31m%Parent%[0m
@@ -42,31 +42,31 @@ if %Parent% == mods (
 
 :dowloadingMissingMods
 set /a progress=0
-echo Downloading ModListFile (mods) >> latestLog.txt
-echo --------------------------------------------------------------------------------------------- >> latestLog.txt
-echo.  TimeStamp   progress  status    modname >> latestLog.txt
-echo --------------------------------------------------------------------------------------------- >> latestLog.txt
+echo Downloading ModListFile (mods) >> %RawPath%/latestLog.txt
+echo --------------------------------------------------------------------------------------------- >> %RawPath%/latestLog.txt
+echo.  TimeStamp   progress  status    modname >> %RawPath%/latestLog.txt
+echo --------------------------------------------------------------------------------------------- >> %RawPath%/latestLog.txt
 bitsadmin.exe /transfer "" /priority FOREGROUND https://onehit.eu/MC_ModLists/MineColonies/mods %~dp0/mods
-REM >> latestLog.txt
+REM >> %RawPath%/latestLog.txt
 set "cmd=findstr /R /N "^^" %~dp0\mods | find /C ":""
 for /f %%a in ('!cmd!') do set ModCount=%%a
 
 for /F "tokens=*" %%A in (%~dp0\mods) do (
     set /a progress=progress+1
-    REM echo Mod Progress: !progress! / %ModCount% >> latestLog.txt
+    REM echo Mod Progress: !progress! / %ModCount% >> %RawPath%/latestLog.txt
 
 if not exist %~dp0\%%A (
-    echo [%time%]  !progress! / %ModCount%   Install  %%A >> latestLog.txt
+    echo [%time%]  !progress! / %ModCount%   Install  %%A >> %RawPath%/latestLog.txt
     bitsadmin.exe /transfer "Mod (!progress! / !ModCount!): %%A"  /priority FOREGROUND https://github.com/greenmaskenergy/MineColonies/raw/master/%%A %~dp0\%%A
 ) else (
-    echo [%time%]  !progress! / %ModCount%   Skipped   %%A >> latestLog.txt
+    echo [%time%]  !progress! / %ModCount%   Skipped   %%A >> %RawPath%/latestLog.txt
 )
 )
-echo --------------------------------------------------------------------------------------------- >> latestLog.txt
-echo update done! >> latestLog.txt
-REM timeout /t 5 /nobreak >nul >> latestLog.txt
+echo --------------------------------------------------------------------------------------------- >> %RawPath%/latestLog.txt
+echo update done! >> %RawPath%/latestLog.txt
+REM timeout /t 5 /nobreak >nul >> %RawPath%/latestLog.txt
 echo.
 echo.
 pause>nul|set/p =[32mDownloader Done![0m press any key to close
-echo closing downloader >> latestLog.txt
+echo closing downloader >> %RawPath%/latestLog.txt
 EXIT /B 0
