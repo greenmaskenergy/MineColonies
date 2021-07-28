@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 cls
 title MineColonies Mod Downloader
-echo by GreenMaskEnergy [90mversion 2.1[0m 
+echo by GreenMaskEnergy [90mversion 2.3[0m 
 echo.
 echo.
 echo Will download only missing mods in the same directory as this is run from!
@@ -42,9 +42,9 @@ if %Parent% == mods (
 set "modsfile=%RawPath%/mods"
 set /a progress=0
 echo --------------------------------------------------------------------------------------------- >> "%log%"
-echo.  TimeStamp     Progress     Status      Modname >> "%log%"
+echo.TimeStamp     Progress     Status      Modname >> "%log%"
 echo --------------------------------------------------------------------------------------------- >> "%log%"
-echo.[%time%]      /      ✅ Download    ModListFile (mods) >> "%log%"
+echo.[%time:~0,-3%]       /      ✅ Download    ModListFile (mods) >> "%log%"
 bitsadmin.exe /transfer "" /priority FOREGROUND https://onehit.eu/MC_ModLists/MineColonies/mods "%RawPath%/mods"
 echo. >> "%log%"
 set "cmd=findstr /R /N "^^" "%RawPath%\mods" | find /C ":""
@@ -66,11 +66,11 @@ FOR /F "USEBACKQ TOKENS=*" %%A IN ("%RawPath%/mods") DO (
     REM set spacer=" "*(%ModCount%)
     if not exist "%~dp0\%%~A" (
         set /a modsDownloaded=!modsDownloaded!+1
-        echo [%time%]  !space!!progress! / %ModCount%   ✅ Download    %%A >> "%log%"
+        echo [!TIME:~0,-3!]   !space!!progress! / %ModCount%   ✅ Download    %%A >> "%log%"
         bitsadmin.exe /transfer "Mod (!progress! / !ModCount!): %%A"  /priority FOREGROUND https://github.com/greenmaskenergy/MineColonies/raw/master/%%A "%RawPath%/%%A"
     ) else (
         set /a modsSkipped=!modsSkipped!+1
-        echo [%time%]  !space!!progress! / %ModCount%   ❌ Skipped     %%A >> "%log%"
+        echo [!TIME:~0,-3!]   !space!!progress! / %ModCount%   ❌ Skipped     %%A >> "%log%"
     )
 )
 echo --------------------------------------------------------------------------------------------- >> "%log%"
