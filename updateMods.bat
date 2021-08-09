@@ -2,10 +2,13 @@
 setlocal enabledelayedexpansion
 cls
 title MineColonies Mod Downloader
-echo by GreenMaskEnergy [90mversion 2.3[0m 
+echo by GreenMaskEnergy [90mversion 2.4[0m 
 echo.
 echo.
-echo Will download only missing mods in the same directory as this is run from!
+echo - download missing mods
+echo - update outdated mods
+echo - remove unused mods
+echo in the same directory as this is run from!
 echo place in (minecraft)/mods folder and run there
 echo =============================================================================
 echo.
@@ -20,7 +23,7 @@ if %Parent% == mods (
     echo.
     echo.
     echo.
-    pause>nul|set/p =[36mpress any key to start[0m downloading missing mods.
+    pause>nul|set/p =[36mpress any key to start[0m download,update,remove mods.
     echo --------------------------------------------------------------------------------------------- > "%log%"
     echo.Location 📁 %RawPath% >> "%log%"
     echo.Date     🕐 %date%>> "%log%"
@@ -52,6 +55,8 @@ for /f %%a in ('!cmd!') do set ModCount=%%a
 set "space=DEF"
 set "modsSkipped=0"
 set "modsDownloaded=0"
+set "modsUpdated=0"
+set "modsRemoved=0"
 FOR /F "USEBACKQ TOKENS=*" %%A IN ("%RawPath%/mods") DO (
     set /a progress=!progress!+1
     if !progress! LSS 1000 (
@@ -64,57 +69,62 @@ FOR /F "USEBACKQ TOKENS=*" %%A IN ("%RawPath%/mods") DO (
         )
     )
     REM set spacer=" "*(%ModCount%)
-    if not exist "%~dp0\%%~A" (
-        set /a modsDownloaded=!modsDownloaded!+1
-        echo [!TIME:~0,-3!]   !space!!progress! / %ModCount%   ✅ Download    %%A >> "%log%"
-        bitsadmin.exe /transfer "Mod (!progress! / !ModCount!): %%A"  /priority FOREGROUND https://github.com/greenmaskenergy/MineColonies/raw/master/%%A "%RawPath%/%%A"
-    ) else (
-        set /a modsSkipped=!modsSkipped!+1
-        echo [!TIME:~0,-3!]   !space!!progress! / %ModCount%   ❌ Skipped     %%A >> "%log%"
+
+
+    Set "fileNameCheck=%%A"
+    for /f "delims=|" %%S in ("!fileNameCheck:-=|!") do (
+        REM Echo [46m%%S[0m
+        if exist "%~dp0%%S*.jar" (
+            REM echo [32mFound %%S "%~dp0%%S*.jar"[0m
+            if exist "%~dp0%%A" (
+                echo [42mUp to Date[0m [32m%%A[0m
+                set /a modsSkipped=!modsSkipped!+1
+                echo [!TIME:~0,-3!]   !space!!progress! / %ModCount%   ❌ Skipped     %%A >> "%log%"
+            ) else (
+                for /R "%RawPath%" %%j in (*.jar) do (
+                    echo %%~nj |find "%%S" >nul
+                    if not errorlevel 1 (
+                        echo [41mDifferent Version[0m [31m%%j [0m[90mNewer version[0m [32m%%A[0m 
+                        DEL "%%j"
+                        set /a modsUpdated=!modsUpdated!+1
+                        echo [!TIME:~0,-3!]   !space!!progress! / %ModCount%   🔼 Updated     %%A >> "%log%"
+                        bitsadmin.exe /transfer "Mod (!progress! / !ModCount!): %%A"  /priority FOREGROUND https://github.com/greenmaskenergy/MineColonies/raw/master/%%A "%RawPath%/%%A"
+                    )
+                    
+                )
+                
+            )
+        ) else (
+            set /a modsDownloaded=!modsDownloaded!+1
+            echo [!TIME:~0,-3!]   !space!!progress! / %ModCount%   ✅ Download    %%A >> "%log%"
+            echo [31mMissing %%S[0m
+            bitsadmin.exe /transfer "Mod (!progress! / !ModCount!): %%A"  /priority FOREGROUND https://github.com/greenmaskenergy/MineColonies/raw/master/%%A "%RawPath%/%%A"
+        )
     )
 )
+echo. >> "%log%"
+REM removing mods that are present in folder but not modpack
+for /R "%RawPath%" %%f in (*.jar) do (
+    >nul find "%%~nf" "%RawPath%\mods" && (
+  REM echo %%~nf was found.
+) || (
+  set /a modsRemoved=!modsRemoved!+1
+  echo [!TIME:~0,-3!]       /      🗑️ Removed     %%~nf >> "%log%"
+  DEL "%%f"
+)
+)
+
+
 echo --------------------------------------------------------------------------------------------- >> "%log%"
 echo.Mods ✅ downloaded: !modsDownloaded! >> "%log%"
+echo.Mods 🔼 Updated:    !modsUpdated! >> "%log%"
 echo.Mods ❌ skipped:    !modsSkipped! >> "%log%"
-cls
-REM pause>nul|set/p =[32mDownloader Done![0m press any key to close
+echo.Mods 🗑️ Removed:    !modsRemoved! >> "%log%"
 echo [92mDownloader Done![0m
 echo.
 echo [36mMods downloaded: !modsDownloaded! [0m
+echo [104mMods updated:  !modsUpdated! [0m
 echo [33mMods skipped: !modsSkipped! [0m
-echo.
-echo closing in 5s
-timeout 1 /nobreak >nul
-cls
-echo [92mDownloader Done![0m
-echo.
-echo [36mMods downloaded: !modsDownloaded! [0m
-echo [33mMods skipped: !modsSkipped! [0m
-echo.
-echo closing in 4s
-timeout 1 /nobreak >nul
-cls
-echo [92mDownloader Done![0m
-echo.
-echo [36mMods downloaded: !modsDownloaded! [0m
-echo [33mMods skipped: !modsSkipped! [0m
-echo.
-echo closing in 3s
-timeout 1 /nobreak >nul
-cls
-echo [92mDownloader Done![0m
-echo.
-echo [36mMods downloaded: !modsDownloaded! [0m
-echo [33mMods skipped: !modsSkipped! [0m
-echo.
-echo closing in 2s
-timeout 1 /nobreak >nul
-cls
-echo [92mDownloader Done![0m
-echo.
-echo [36mMods downloaded: !modsDownloaded! [0m
-echo [33mMods skipped: !modsSkipped! [0m
-echo.
-echo closing in 1s
-timeout 1 /nobreak >nul
+echo [101mMods removed: !modsRemoved! [0m
+timeout 5 /nobreak >nul
 EXIT /B 0
