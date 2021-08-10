@@ -45,7 +45,7 @@ if %Parent% == mods (
 set "modsfile=%RawPath%/mods"
 set /a progress=0
 echo --------------------------------------------------------------------------------------------- >> "%log%"
-echo.TimeStamp     Progress     Status      Modname >> "%log%"
+echo.TimeStamp     Progress      Status           Modname >> "%log%"
 echo --------------------------------------------------------------------------------------------- >> "%log%"
 echo.[%time:~0,-3%]       /      ✅ Download    ModListFile (mods) >> "%log%"
 bitsadmin.exe /transfer "" /priority FOREGROUND https://onehit.eu/MC_ModLists/MineColonies/mods "%RawPath%/mods"
@@ -104,7 +104,7 @@ FOR /F "USEBACKQ TOKENS=*" %%A IN ("%RawPath%/mods") DO (
 )
 echo. >> "%log%"
 REM removing mods that are present in folder but not modpack
-for /R "%RawPath%" %%f in (*.jar) do (
+for /R "%RawPath%" %%f in ("*.jar") do (
     >nul find "%%~nf" "%RawPath%\mods" && (
   REM echo %%~nf was found.
 ) || (
